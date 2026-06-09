@@ -1,0 +1,34 @@
+CREATE DATABASE IF NOT EXISTS SRMS;
+USE SRMS;
+
+CREATE TABLE IF NOT EXISTS Customer (
+  customerNumber INT AUTO_INCREMENT PRIMARY KEY,
+  firstName VARCHAR(100) NOT NULL,
+  lastName VARCHAR(100) NOT NULL,
+  telephone VARCHAR(20) NOT NULL,
+  address VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Product (
+  productCode INT AUTO_INCREMENT PRIMARY KEY,
+  productName VARCHAR(150) NOT NULL,
+  quantitySold INT NOT NULL,
+  unitPrice DECIMAL(10,2) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Sale (
+  invoiceNumber INT AUTO_INCREMENT PRIMARY KEY,
+  salesDate DATE NOT NULL,
+  paymentMethod VARCHAR(50) NOT NULL,
+  totalAmountPaid DECIMAL(10,2) NOT NULL,
+  customerNumber INT NOT NULL,
+  productCode INT NOT NULL,
+  FOREIGN KEY (customerNumber) REFERENCES Customer(customerNumber),
+  FOREIGN KEY (productCode) REFERENCES Product(productCode)
+);
+
+CREATE TABLE IF NOT EXISTS Users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(100) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL
+);
