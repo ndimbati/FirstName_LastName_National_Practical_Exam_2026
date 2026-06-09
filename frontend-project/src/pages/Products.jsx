@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import API from '../api';
 
 export default function Products() {
@@ -7,14 +7,20 @@ export default function Products() {
   const [msg, setMsg] = useState('');
   const [error, setError] = useState('');
 
+  const fetchRecords = () => {
+    API.get('/products').then((res) => setRecords(res.data)).catch(() => {});
+  };
+
+  useEffect(() => { fetchRecords(); }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMsg(''); setError('');
     try {
       await API.post('/products', form);
       setMsg('Product added successfully!');
-      setRecords((prev) => [...prev, form]);
       setForm({ productName: '', quantitySold: '', unitPrice: '' });
+      fetchRecords();
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to add product');
     }
@@ -47,16 +53,17 @@ export default function Products() {
         <h3 className="text-xl font-bold text-blue-900 mb-4">Product Records</h3>
         <div className="bg-white rounded-xl shadow overflow-y-auto flex-1">
           <table className="w-full text-sm">
-            <thead className="bg-blue-700 text-white">
-              <tr>{['Product Name', 'Qty Sold', 'Unit Price (RWF)'].map((h) => (
+            <thead className="bg-blue-700 text-white sticky top-0">
+              <tr>{['#', 'Product Name', 'Qty Sold', 'Unit Price (RWF)'].map((h) => (
                 <th key={h} className="px-4 py-3 text-left">{h}</th>
               ))}</tr>
             </thead>
             <tbody>
               {records.length === 0 ? (
-                <tr><td colSpan="3" className="text-center py-6 text-gray-400">No records yet</td></tr>
+                <tr><td colSpan="4" className="text-center py-6 text-gray-400">No records yet</td></tr>
               ) : records.map((r, i) => (
-                <tr key={i} className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                <tr key={r.productCode} className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                  <td className="px-4 py-3 text-gray-400">{r.productCode}</td>
                   <td className="px-4 py-3">{r.productName}</td>
                   <td className="px-4 py-3">{r.quantitySold}</td>
                   <td className="px-4 py-3">{Number(r.unitPrice).toLocaleString()}</td>

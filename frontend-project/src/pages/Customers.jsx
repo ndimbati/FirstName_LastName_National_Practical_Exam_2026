@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import API from '../api';
 
 export default function Customers() {
@@ -7,14 +7,20 @@ export default function Customers() {
   const [msg, setMsg] = useState('');
   const [error, setError] = useState('');
 
+  const fetchRecords = () => {
+    API.get('/customers').then((res) => setRecords(res.data)).catch(() => {});
+  };
+
+  useEffect(() => { fetchRecords(); }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMsg(''); setError('');
     try {
       await API.post('/customers', form);
       setMsg('Customer added successfully!');
-      setRecords((prev) => [...prev, form]);
       setForm({ firstName: '', lastName: '', telephone: '', address: '' });
+      fetchRecords();
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to add customer');
     }
@@ -48,16 +54,17 @@ export default function Customers() {
         <h3 className="text-xl font-bold text-blue-900 mb-4">Customer Records</h3>
         <div className="bg-white rounded-xl shadow overflow-y-auto flex-1">
           <table className="w-full text-sm">
-            <thead className="bg-blue-700 text-white">
-              <tr>{['First Name', 'Last Name', 'Telephone', 'Address'].map((h) => (
+            <thead className="bg-blue-700 text-white sticky top-0">
+              <tr>{['#', 'First Name', 'Last Name', 'Telephone', 'Address'].map((h) => (
                 <th key={h} className="px-4 py-3 text-left">{h}</th>
               ))}</tr>
             </thead>
             <tbody>
               {records.length === 0 ? (
-                <tr><td colSpan="4" className="text-center py-6 text-gray-400">No records yet</td></tr>
+                <tr><td colSpan="5" className="text-center py-6 text-gray-400">No records yet</td></tr>
               ) : records.map((r, i) => (
-                <tr key={i} className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                <tr key={r.customerNumber} className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                  <td className="px-4 py-3 text-gray-400">{r.customerNumber}</td>
                   <td className="px-4 py-3">{r.firstName}</td>
                   <td className="px-4 py-3">{r.lastName}</td>
                   <td className="px-4 py-3">{r.telephone}</td>
